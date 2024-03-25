@@ -4,13 +4,13 @@ import br.com.rsfot.util.*;
 
 import java.util.*;
 
-import static br.com.rsfot.domain.EnvironmentFeelings.GLITTER;
+import static br.com.rsfot.domain.Feelings.*;
 import static br.com.rsfot.domain.EnvironmentObject.GOLD;
 
 public class Environment {
     private String[][] cave;
     private int dimension;
-    private Map<String, Set<EnvironmentFeelings>> feelingsByCoordinate;
+    private Map<String, Set<Feelings>> feelingsByCoordinate;
 
     public Environment(int dimension) {
         if (dimension < 4) {
@@ -35,7 +35,7 @@ public class Environment {
         return dimension;
     }
 
-    public Map<String, Set<EnvironmentFeelings>> getFeelingsByCoordinate() {
+    public Map<String, Set<Feelings>> getFeelingsByCoordinate() {
         return Collections.unmodifiableMap(feelingsByCoordinate);
     }
 
@@ -76,7 +76,7 @@ public class Environment {
     }
 
     private void removeGlitterFromFeelings(int x, int y) {
-        Set<EnvironmentFeelings> environmentFeelingsByXandY = feelingsByCoordinate.get(x + "," + y);
+        Set<Feelings> environmentFeelingsByXandY = feelingsByCoordinate.get(x + "," + y);
         environmentFeelingsByXandY.remove(GLITTER);
         feelingsByCoordinate.put(x + "," + y, environmentFeelingsByXandY);
     }
@@ -89,5 +89,24 @@ public class Environment {
     public void mineGold(int x, int y) {
         removeGlitterFromFeelings(x, y);
         removeGoldFromCave();
+    }
+
+    public String getJsonOfFeelingsByCoordinate(String coordinate) {
+        return """
+                STENCH: %b,
+                BREEZE: %b,
+                GLITTER: %b,
+                WUMPUS_SCREAM: %b
+                """.formatted(
+                isThereFeelingAt(STENCH, coordinate),
+                isThereFeelingAt(BREEZE, coordinate),
+                isThereFeelingAt(GLITTER, coordinate),
+                isThereFeelingAt(WUMPUS_SCREAM, coordinate)
+                );
+
+    }
+
+    private boolean isThereFeelingAt(Feelings feeling, String coordinate) {
+        return feelingsByCoordinate.get(coordinate).contains(feeling);
     }
 }

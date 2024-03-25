@@ -1,5 +1,6 @@
 package br.com.rsfot.main;
 
+import br.com.rsfot.domain.Direction;
 import br.com.rsfot.game.HuntWumpus;
 
 import java.util.Scanner;
@@ -32,29 +33,45 @@ public class App {
             System.out.print(huntWumpus.getEnvironment().getFeelingsByCoordinate());
             System.out.println(" -> Feelings[%d,%d]:".formatted(huntWumpus.getAgent().getCoordinateX(), huntWumpus.getAgent().getCoordinateY()));
             System.out.println(huntWumpus.getEnvironment().getFeelingsByCoordinate().get(huntWumpus.getAgent().getStringCoordinate()));
-            int option = Integer.parseInt(scanner.nextLine());
-            switch (option) {
-                case 1:
-                    huntWumpus.turnAgentTo(LEFT);
-                    break;
-                case 2:
-                    huntWumpus.turnAgentTo(RIGHT);
-                    break;
-                case 3:
-                    huntWumpus.moveForward();
-                    break;
-                case 4:
-                    huntWumpus.grabGold();
-                    break;
-                case 5:
-                    huntWumpus.shoot();
-                    break;
-                case 6:
-                    gameOver = true;
-                    break;
-                default:
-                    System.out.println("Invalid option");
+//            int option = Integer.parseInt(scanner.nextLine());
+            String option = scanner.nextLine();
+            if (option.contains("1")) {
+                Direction direction = Direction.valueOf(option.split(" ")[1]);
+                huntWumpus.moveToDirection(direction);
+            } else if ("2".equals(option)) {
+                huntWumpus.grabGold();
+            } else if ("3".equals(option)) {
+                huntWumpus.shoot();
+            } else if ("4".equals(option)) {
+                gameOver = true;
+            } else {
+                System.out.println("Invalid option");
+
             }
+
+
+//            switch (option) {
+//                case 1:
+//                    huntWumpus.turnAgentTo(LEFT);
+//                    break;
+//                case 2:
+//                    huntWumpus.turnAgentTo(RIGHT);
+//                    break;
+//                case 3:
+//                    huntWumpus.moveForward();
+//                    break;
+//                case 4:
+//                    huntWumpus.grabGold();
+//                    break;
+//                case 5:
+//                    huntWumpus.shoot();
+//                    break;
+//                case 6:
+//                    gameOver = true;
+//                    break;
+//                default:
+//                    System.out.println("Invalid option");
+//            }
         }
 
         scanner.close();
@@ -67,12 +84,10 @@ public class App {
 
     public static String menu() {
         return """
-                1 - Turn left
-                2 - Turn right
-                3 - Move forward
-                4 - Grab Gold
-                5 - Shoot
-                6 - Exit
+                1 - Move to Direction
+                2 - Grab Gold
+                3 - Shoot
+                4 - Exit
                 """;
     }
 }

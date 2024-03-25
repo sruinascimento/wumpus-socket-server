@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static br.com.rsfot.domain.Direction.*;
-import static br.com.rsfot.domain.EnvironmentFeelings.GLITTER;
+import static br.com.rsfot.domain.Feelings.GLITTER;
 import static br.com.rsfot.domain.EnvironmentObject.PIT;
 import static br.com.rsfot.domain.EnvironmentObject.WUMPUS;
 import static br.com.rsfot.domain.Rotation.LEFT;
@@ -66,8 +66,8 @@ class HuntWumpusTest {
         assertThat(huntWumpus.getAgent().hasGold()).isTrue();
     }
 
-    private int[] retrieveGoldCoordinate(Map<String, Set<EnvironmentFeelings>> feelingsByCoordinate) {
-        for (Map.Entry<String, Set<EnvironmentFeelings>> feelings : feelingsByCoordinate.entrySet()) {
+    private int[] retrieveGoldCoordinate(Map<String, Set<Feelings>> feelingsByCoordinate) {
+        for (Map.Entry<String, Set<Feelings>> feelings : feelingsByCoordinate.entrySet()) {
             if (feelings.getValue().contains(GLITTER)) {
                 return buildCoordinateFromString(feelings.getKey()); // Retorna a chave (coordenada) correspondente ao valor
             }

@@ -1,6 +1,6 @@
 package br.com.rsfot.domain;
 
-public enum EnvironmentFeelings {
+public enum Feelings {
     STENCH,
     BREEZE,
     GLITTER,

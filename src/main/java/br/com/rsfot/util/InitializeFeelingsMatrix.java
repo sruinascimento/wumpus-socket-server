@@ -1,34 +1,34 @@
 package br.com.rsfot.util;
 
-import br.com.rsfot.domain.EnvironmentFeelings;
+import br.com.rsfot.domain.Feelings;
 
 import java.util.*;
 
-import static br.com.rsfot.domain.EnvironmentFeelings.GLITTER;
+import static br.com.rsfot.domain.Feelings.GLITTER;
 import static br.com.rsfot.domain.EnvironmentObject.*;
 
 public class InitializeFeelingsMatrix {
-    private static Map<String, Set<EnvironmentFeelings>> feelingsByCoordinate = new LinkedHashMap<>();
+    private static Map<String, Set<Feelings>> feelingsByCoordinate = new LinkedHashMap<>();
 
     private void InitializeElementsMatrix() {
         throw new UnsupportedOperationException("Object cannot be instancied!");
     }
 
-    public static Map<String, Set<EnvironmentFeelings>> setup(String[][] environmentMatrix) {
+    public static Map<String, Set<Feelings>> setup(String[][] environmentMatrix) {
         int dimension = environmentMatrix.length;
         for (int i = 0; i < dimension; i++) {
             for (int j = 0; j < dimension; j++) {
 
-                Set<EnvironmentFeelings> feelings = new HashSet<>();
+                Set<Feelings> feelings = new HashSet<>();
 
                 if (isGlitter(i, j, environmentMatrix)) {
                     feelings.add(GLITTER);
                 }
                 if (isStench(i, j, environmentMatrix)) {
-                    feelings.add(EnvironmentFeelings.STENCH);
+                    feelings.add(Feelings.STENCH);
                 }
                 if (isBreeze(i, j, environmentMatrix)) {
-                    feelings.add(EnvironmentFeelings.BREEZE);
+                    feelings.add(Feelings.BREEZE);
                 }
 
                 feelingsByCoordinate.put(i + "," + j, feelings);

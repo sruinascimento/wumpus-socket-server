@@ -1,15 +1,13 @@
 package br.com.rsfot.main;
 
-import br.com.rsfot.domain.EnvironmentFeelings;
+import br.com.rsfot.domain.Direction;
+import br.com.rsfot.domain.Feelings;
 import br.com.rsfot.game.HuntWumpus;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Set;
-
-import static br.com.rsfot.domain.Rotation.LEFT;
-import static br.com.rsfot.domain.Rotation.RIGHT;
 
 public class MainServer {
     private static final int PORT = 7373;
@@ -46,56 +44,53 @@ public class MainServer {
 
     private static void processClientCommands(PrintWriter out, BufferedReader in, Socket socket) throws IOException {
         String clientResponse;
-        while (!(clientResponse = in.readLine()).equals("6")) {
+
+        while (!(clientResponse = in.readLine()).equals("4") && !huntWumpus.isGameOver()) {
             System.out.println("Client %s response: %s".formatted(socket.getRemoteSocketAddress(), clientResponse));
             String serverResponse = processCommand(clientResponse.trim());
             out.println(serverResponse);
-            out.println(menu());
         }
+        socket.close();
     }
 
     private static String processCommand(String command) {
-        String actionResult = "Last movement: ";
-        switch (command) {
-            case "1":
-                huntWumpus.turnAgentTo(LEFT);
-                actionResult += "Turned left";
-                break;
-            case "2":
-                huntWumpus.turnAgentTo(RIGHT);
-                actionResult += "Turned right";
-                break;
-            case "3":
-                huntWumpus.moveForward();
-                actionResult += "Moved forward";
-                break;
-            case "4":
-                huntWumpus.grabGold();
-                actionResult += "Grabbed Gold";
-                break;
-            case "5":
-                huntWumpus.shoot();
-                actionResult += "Shot";
-                break;
-            default:
-                return "Invalid command";
+
+        if (command.contains("1")) {
+            Direction directionToForward = Direction.valueOf(command.split(" ")[1].toUpperCase());
+            huntWumpus.moveToDirection(directionToForward);
+        } else if (command.equals("2")) {
+            huntWumpus.grabGold();
+        } else if (command.equals("3")) {
+            huntWumpus.shoot();
+        } else if (command.equals("4")) {
+            return reportOfTurn();
+        } else {
+            return "Invalid command";
         }
+        return reportOfTurn();
+    }
 
-        String agentStatus = huntWumpus.getAgent().toString();
-        Set<EnvironmentFeelings> environmentFeelings = huntWumpus.getEnvironment().getFeelingsByCoordinate().get(huntWumpus.getAgent().getStringCoordinate());
-        return actionResult + "\n" + agentStatus + "\n" + environmentFeelings;
-
-//        return actionResult + "\n" + agentStatus + "\n" + feelings;
+    private static String reportOfTurn() {
+        return """
+                                {
+                                    "agent: {
+                                        %s
+                                    },
+                                    "environment": [
+                                        %s
+                                    ] 
+                                }
+                                
+                """.formatted(huntWumpus.getJsonOfAgent(),
+                huntWumpus.getEnvironment().getJsonOfFeelingsByCoordinate(huntWumpus.getAgent().getStringCoordinate()));
     }
 
     private static String menu() {
         return """
-                1 - Turn left
-                2 - Turn right
-                3 - Move forward
-                4 - Grab Gold
-                5 - Shoot
-                6 - Exit
-                """;
+                1 - Move to Direction
+                2 - Grab Gold
+                3 - Shoot
+                4 - Exit
+                 """;
     }
 }
