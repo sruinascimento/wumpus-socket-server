@@ -4,9 +4,6 @@ import br.com.rsfot.util.*;
 
 import java.util.*;
 
-import static br.com.rsfot.domain.Feelings.*;
-import static br.com.rsfot.domain.EnvironmentObject.GOLD;
-
 public class Environment {
     private String[][] cave;
     private int dimension;
@@ -40,7 +37,7 @@ public class Environment {
     }
 
     public void showCave() {
-        System.out.println(MatrixFormatter.formatMatrix(cave, 2, 1));
+        System.out.println(MatrixFormatter.format(cave, 2, 1));
     }
 
     public void setCave(String[][] cave) {
@@ -73,40 +70,5 @@ public class Environment {
             }
         }
         throw new RuntimeException("Object not found");
-    }
-
-    private void removeGlitterFromFeelings(int x, int y) {
-        Set<Feelings> environmentFeelingsByXandY = feelingsByCoordinate.get(x + "," + y);
-        environmentFeelingsByXandY.remove(GLITTER);
-        feelingsByCoordinate.put(x + "," + y, environmentFeelingsByXandY);
-    }
-
-    private void removeGoldFromCave() {
-        int[] goldCoordinate = getCoordinateOf(GOLD);
-        cave[goldCoordinate[0]][goldCoordinate[1]] = "";
-    }
-
-    public void mineGold(int x, int y) {
-        removeGlitterFromFeelings(x, y);
-        removeGoldFromCave();
-    }
-
-    public String getJsonOfFeelingsByCoordinate(String coordinate) {
-        return """
-                STENCH: %b,
-                BREEZE: %b,
-                GLITTER: %b,
-                WUMPUS_SCREAM: %b
-                """.formatted(
-                isThereFeelingAt(STENCH, coordinate),
-                isThereFeelingAt(BREEZE, coordinate),
-                isThereFeelingAt(GLITTER, coordinate),
-                isThereFeelingAt(WUMPUS_SCREAM, coordinate)
-                );
-
-    }
-
-    private boolean isThereFeelingAt(Feelings feeling, String coordinate) {
-        return feelingsByCoordinate.get(coordinate).contains(feeling);
     }
 }

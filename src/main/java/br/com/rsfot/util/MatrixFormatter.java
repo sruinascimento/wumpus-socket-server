@@ -1,7 +1,7 @@
 package br.com.rsfot.util;
 
 public class MatrixFormatter {
-    public static String formatMatrix(String[][] matrix, int horizontalSpacing, int verticalSpacing) {
+    public static String format(String[][] matrix, int horizontalSpacing, int verticalSpacing) {
         StringBuilder formattedMatrix = new StringBuilder();
 
         int numRows = matrix.length;

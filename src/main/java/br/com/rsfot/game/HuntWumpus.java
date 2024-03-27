@@ -10,7 +10,7 @@ import static br.com.rsfot.domain.Rotation.RIGHT;
 
 public class HuntWumpus {
     private Agent agent = new Agent();
-    private Environment environment = new Environment(4);
+    private Environment environment;
     private boolean agentWinTheGame = false;
 
     public HuntWumpus() {
@@ -18,6 +18,9 @@ public class HuntWumpus {
 
     public HuntWumpus(Agent agent, Environment environment) {
         this.agent = agent;
+        this.environment = environment;
+    }
+    public HuntWumpus(Environment environment) {
         this.environment = environment;
     }
 
@@ -75,18 +78,12 @@ public class HuntWumpus {
     }
 
     private boolean canWalk() {
-        switch (agent.getFacingDirection()) {
-            case NORTH:
-                return agent.getCoordinateX() - 1 >= 0;
-            case SOUTH:
-                return agent.getCoordinateX() + 1 <= environment.getDimension() - 1;
-            case EAST:
-                return agent.getCoordinateY() + 1 <= environment.getDimension() - 1;
-            case WEST:
-                return agent.getCoordinateY() - 1 >= 0;
-            default:
-                return false;
-        }
+        return switch (agent.getFacingDirection()) {
+            case NORTH -> agent.getCoordinateX() - 1 >= 0;
+            case SOUTH -> agent.getCoordinateX() + 1 <= environment.getDimension() - 1;
+            case EAST -> agent.getCoordinateY() + 1 <= environment.getDimension() - 1;
+            case WEST -> agent.getCoordinateY() - 1 >= 0;
+        };
     }
 
     public void grabGold() {

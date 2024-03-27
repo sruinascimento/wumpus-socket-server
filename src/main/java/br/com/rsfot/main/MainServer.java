@@ -1,17 +1,18 @@
 package br.com.rsfot.main;
 
 import br.com.rsfot.domain.Direction;
-import br.com.rsfot.domain.Feelings;
+import br.com.rsfot.domain.Environment;
+import br.com.rsfot.report.ReportGenerator;
 import br.com.rsfot.game.HuntWumpus;
+import br.com.rsfot.util.MatrixFormatter;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Set;
 
 public class MainServer {
     private static final int PORT = 7373;
-    private static HuntWumpus huntWumpus = new HuntWumpus();
+    public static Environment environment = new Environment(4);
 
     public static void main(String[] args) {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
@@ -31,9 +32,10 @@ public class MainServer {
              PrintWriter out = new PrintWriter(outputStream, true);
              InputStream inputStream = socket.getInputStream();
              BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
-
+            HuntWumpus huntWumpus = new HuntWumpus(environment);
+            out.println(report(huntWumpus));
             out.println(menu());
-            processClientCommands(out, in, socket);
+            processClientCommands(out, in, socket, huntWumpus);
 
         } catch (IOException e) {
             System.err.println("Error handling client: " + e.getMessage());
@@ -42,19 +44,22 @@ public class MainServer {
         }
     }
 
-    private static void processClientCommands(PrintWriter out, BufferedReader in, Socket socket) throws IOException {
+    private static void processClientCommands(PrintWriter out, BufferedReader in, Socket socket, HuntWumpus huntWumpus) throws IOException {
         String clientResponse;
 
-        while (!(clientResponse = in.readLine()).equals("4") && !huntWumpus.isGameOver()) {
+        while (!(clientResponse = in.readLine()).equals("4")) {
             System.out.println("Client %s response: %s".formatted(socket.getRemoteSocketAddress(), clientResponse));
-            String serverResponse = processCommand(clientResponse.trim());
+            String serverResponse = processCommand(clientResponse.trim(), huntWumpus);
             out.println(serverResponse);
+
+            if (huntWumpus.isGameOver()) {
+                out.println();
+            }
         }
         socket.close();
     }
 
-    private static String processCommand(String command) {
-
+    private static String processCommand(String command, HuntWumpus huntWumpus) {
         if (command.contains("1")) {
             Direction directionToForward = Direction.valueOf(command.split(" ")[1].toUpperCase());
             huntWumpus.moveToDirection(directionToForward);
@@ -63,26 +68,17 @@ public class MainServer {
         } else if (command.equals("3")) {
             huntWumpus.shoot();
         } else if (command.equals("4")) {
-            return reportOfTurn();
+            return ReportGenerator.generate(huntWumpus);
         } else {
             return "Invalid command";
         }
-        return reportOfTurn();
+        return report(huntWumpus);
     }
 
-    private static String reportOfTurn() {
-        return """
-                                {
-                                    "agent: {
-                                        %s
-                                    },
-                                    "environment": [
-                                        %s
-                                    ] 
-                                }
-                                
-                """.formatted(huntWumpus.getJsonOfAgent(),
-                huntWumpus.getEnvironment().getJsonOfFeelingsByCoordinate(huntWumpus.getAgent().getStringCoordinate()));
+    private static String report(HuntWumpus huntWumpus) {
+        return MatrixFormatter.format(huntWumpus.getEnvironment().getCave(), 1, 1)
+                + "\n\n\n" +
+                ReportGenerator.generate(huntWumpus);
     }
 
     private static String menu() {
