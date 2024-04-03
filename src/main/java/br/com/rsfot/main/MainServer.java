@@ -12,7 +12,7 @@ import java.net.Socket;
 
 public class MainServer {
     private static final int PORT = 7373;
-    public static Environment environment = new Environment(4);
+    public static final Environment environment = new Environment(4);
 
     public static void main(String[] args) {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
@@ -33,10 +33,9 @@ public class MainServer {
              InputStream inputStream = socket.getInputStream();
              BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
             HuntWumpus huntWumpus = new HuntWumpus(environment);
-            out.println(report(huntWumpus));
-            out.println(menu());
+            out.println(report(huntWumpus, false));
+            out.println(options());
             processClientCommands(out, in, socket, huntWumpus);
-
         } catch (IOException e) {
             System.err.println("Error handling client: " + e.getMessage());
         } finally {
@@ -51,42 +50,50 @@ public class MainServer {
             System.out.println("Client %s response: %s".formatted(socket.getRemoteSocketAddress(), clientResponse));
             String serverResponse = processCommand(clientResponse.trim(), huntWumpus);
             out.println(serverResponse);
-
             if (huntWumpus.isGameOver()) {
-                out.println();
+                break;
             }
         }
+        out.println("Gamer Over!");
+        out.println(report(huntWumpus, false));
         socket.close();
     }
 
     private static String processCommand(String command, HuntWumpus huntWumpus) {
-        if (command.contains("1")) {
-            Direction directionToForward = Direction.valueOf(command.split(" ")[1].toUpperCase());
-            huntWumpus.moveToDirection(directionToForward);
-        } else if (command.equals("2")) {
-            huntWumpus.grabGold();
-        } else if (command.equals("3")) {
-            huntWumpus.shoot();
-        } else if (command.equals("4")) {
-            return ReportGenerator.generate(huntWumpus);
-        } else {
+        boolean impact = false;
+        try {
+            if (command.contains("1")) {
+                Direction directionToForward = extractDirection(command);
+                impact = !huntWumpus.moveToDirection(directionToForward);
+            } else if (command.equals("2")) {
+                huntWumpus.grabGold();
+            } else if (command.contains("3")) {
+                Direction directionToShoot = extractDirection(command);
+                huntWumpus.shoot(directionToShoot);
+            } else {
+                return "Invalid command";
+            }
+        } catch (Exception e) {
             return "Invalid command";
         }
-        return report(huntWumpus);
+        return report(huntWumpus, impact);
     }
 
-    private static String report(HuntWumpus huntWumpus) {
+    private static Direction extractDirection(String command) {
+        return Direction.valueOf(command.split(" ")[1].toUpperCase());
+    }
+
+    private static String report(HuntWumpus huntWumpus, boolean impact) {
         return MatrixFormatter.format(huntWumpus.getEnvironment().getCave(), 1, 1)
                 + "\n\n\n" +
-                ReportGenerator.generate(huntWumpus);
+                ReportGenerator.generate(huntWumpus, impact);
     }
 
-    private static String menu() {
+    private static String options() {
         return """
                 1 - Move to Direction
                 2 - Grab Gold
                 3 - Shoot
-                4 - Exit
                  """;
     }
 }

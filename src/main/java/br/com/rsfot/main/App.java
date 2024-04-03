@@ -41,7 +41,7 @@ public class App {
             } else if ("2".equals(option)) {
                 huntWumpus.grabGold();
             } else if ("3".equals(option)) {
-                huntWumpus.shoot();
+//                huntWumpus.shoot();
             } else if ("4".equals(option)) {
                 gameOver = true;
             } else {

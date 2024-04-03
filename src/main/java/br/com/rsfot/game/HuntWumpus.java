@@ -3,10 +3,8 @@ package br.com.rsfot.game;
 import br.com.rsfot.domain.*;
 
 import static br.com.rsfot.domain.Direction.*;
+import static br.com.rsfot.domain.EnvironmentObject.WUMPUS;
 import static br.com.rsfot.domain.Feelings.GLITTER;
-import static br.com.rsfot.domain.EnvironmentObject.*;
-import static br.com.rsfot.domain.Rotation.LEFT;
-import static br.com.rsfot.domain.Rotation.RIGHT;
 
 public class HuntWumpus {
     private Agent agent = new Agent();
@@ -14,11 +12,6 @@ public class HuntWumpus {
     private boolean agentWinTheGame = false;
 
     public HuntWumpus() {
-    }
-
-    public HuntWumpus(Agent agent, Environment environment) {
-        this.agent = agent;
-        this.environment = environment;
     }
     public HuntWumpus(Environment environment) {
         this.environment = environment;
@@ -32,38 +25,11 @@ public class HuntWumpus {
         return environment;
     }
 
-    public void turnAgentTo(Rotation rotation) {
+    public boolean moveForward() {
+        if (!canWalk()) {
+            return false;
+        }
         if (agent.isAlive()) {
-            if (LEFT.equals(rotation)) {
-                turnAgentLeft();
-            }
-            if (RIGHT.equals(rotation)) {
-                turnAgentRight();
-            }
-            agent.decreasePointByAction();
-        }
-    }
-
-    private void turnAgentLeft() {
-        switch (agent.getFacingDirection()) {
-            case NORTH -> agent.setFacingDirection(WEST);
-            case WEST -> agent.setFacingDirection(SOUTH);
-            case SOUTH -> agent.setFacingDirection(EAST);
-            case EAST -> agent.setFacingDirection(NORTH);
-        }
-    }
-
-    private void turnAgentRight() {
-        switch (agent.getFacingDirection()) {
-            case NORTH -> agent.setFacingDirection(EAST);
-            case EAST -> agent.setFacingDirection(SOUTH);
-            case SOUTH -> agent.setFacingDirection(WEST);
-            case WEST -> agent.setFacingDirection(NORTH);
-        }
-    }
-
-    public void moveForward() {
-        if (canWalk() && agent.isAlive()) {
             agent.moveForward();
             agent.decreasePointByAction();
             if (isTheAgentDead()) {
@@ -75,6 +41,7 @@ public class HuntWumpus {
                 this.agentWinTheGame = true;
             }
         }
+        return true;
     }
 
     private boolean canWalk() {
@@ -93,8 +60,9 @@ public class HuntWumpus {
         }
     }
 
-    public void shoot() {
+    public void shoot(Direction direction) {
         if (agent.hasArrow()) {
+            agent.setFacingDirection(direction);
             agent.shoot();
             agent.decreasePointByShoot();
             if (isTheAgentKillTheWumpus()) {
@@ -182,29 +150,13 @@ public class HuntWumpus {
         return !agent.isAlive() || agentWinTheGame;
     }
 
-    public void moveToDirection(Direction desiredDirection) {
+    public boolean moveToDirection(Direction desiredDirection) {
         switch (desiredDirection) {
             case NORTH -> agent.setFacingDirection(NORTH);
             case SOUTH -> agent.setFacingDirection(SOUTH);
             case EAST -> agent.setFacingDirection(EAST);
             case WEST -> agent.setFacingDirection(WEST);
         }
-        this.moveForward();
-    }
-
-    public String getJsonOfAgent() {
-        return """                                
-                "coordinate": "%s",
-                "direction": "%s",
-                "score": %d,
-                "hasArrow": %b,
-                "hasGold": %b,
-                "killedTheWumpus": %b
-                     """.formatted(agent.getStringCoordinate(),
-                agent.getFacingDirection(),
-                agent.getScore(),
-                agent.hasArrow(),
-                agent.hasGold(),
-                agent.isKilledTheWumpus());
+        return this.moveForward();
     }
 }
