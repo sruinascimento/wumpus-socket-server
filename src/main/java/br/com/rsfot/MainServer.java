@@ -1,4 +1,4 @@
-package br.com.rsfot.main;
+package br.com.rsfot;
 
 import br.com.rsfot.domain.Environment;
 import br.com.rsfot.handler.HandlerClient;
