@@ -3,7 +3,7 @@ package br.com.rsfot.report;
 import br.com.rsfot.game.HuntWumpus;
 import com.google.gson.Gson;
 
-public class ReportGenerator {
+public class Report {
     public static String generate(HuntWumpus huntWumpus, boolean impactOgAgentOnTheWall) {
         AgentStatus agentStatus = new AgentStatus(huntWumpus.getAgent());
         FeelingByCoordinate feelingByCoordinate = new FeelingByCoordinate(huntWumpus.getEnvironment(), huntWumpus.getAgent(), impactOgAgentOnTheWall);
