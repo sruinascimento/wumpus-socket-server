@@ -33,7 +33,9 @@ public class HandlerClient {
 
         while (!(clientResponse = in.readLine()).equals("4")) {
             logger.info("Client %s response: %s".formatted(socket.getRemoteSocketAddress(), clientResponse));
-            out.println(MatrixFormatter.format(huntWumpus.getEnvironment().getCave(), 4, 1));
+            //TODO: remover esse comentário pois representa a matrix do jogo com as informações
+//            out.println(MatrixFormatter.format(huntWumpus.getEnvironment().getCave(), 4, 1));
+            System.out.println(MatrixFormatter.format(huntWumpus.getEnvironment().getCave(), 4, 1));
             String serverResponse = ProcessCommand.from(clientResponse.trim(), huntWumpus);
             out.println(serverResponse);
             if (huntWumpus.isGameOver()) {
