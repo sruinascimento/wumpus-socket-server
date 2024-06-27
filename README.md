@@ -5,7 +5,7 @@
 ### Orientador: Dr. Otávio Teixeira
 
 
-Este repo contém o código-fonte do trabalho de conclusão de curso de Rui Nascimento, aluno do curso de Engenharia de
+Este repo contém o código-fonte do trabalho de conclusão de curso de Engenharia de
 Computação da Universidade Federal do Pará, Campus Tucuruí.
 
 O trabalho visa a criação do mundo de Wumpus com a linguagem de programação Java, e integração com o [CST](https://cst.fee.unicamp.br/),
