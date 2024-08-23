@@ -12,12 +12,14 @@ import java.util.logging.Logger;
 
 public class HandlerClient {
     private static final Logger logger = Logger.getLogger(HandlerClient.class.getName());
+
     public static void handleClient(Socket socket, Environment environment) {
         logger.info("Client connected: " + socket.getRemoteSocketAddress());
         try (OutputStream outputStream = socket.getOutputStream();
              PrintWriter out = new PrintWriter(outputStream, true);
              InputStream inputStream = socket.getInputStream();
              BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
+
             HuntWumpus huntWumpus = new HuntWumpus(environment);
             out.println(Report.generate(huntWumpus, false));
             processClientCommands(out, in, socket, huntWumpus);
@@ -42,7 +44,6 @@ public class HandlerClient {
                 break;
             }
         }
-        out.println("Gamer Over!");
         socket.close();
     }
 }
