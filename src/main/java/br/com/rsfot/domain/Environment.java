@@ -2,9 +2,10 @@ package br.com.rsfot.domain;
 
 import br.com.rsfot.util.*;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Environment {
+public class Environment implements Serializable {
     private String[][] cave;
     private int dimension;
     private Map<String, Set<Feelings>> feelingsByCoordinate;
@@ -37,7 +38,9 @@ public class Environment {
     }
 
     public void showCave() {
+        System.out.println("-------------------");
         System.out.println(MatrixFormatter.format(cave, 2, 1));
+        System.out.println("-------------------");
     }
 
     public void setCave(String[][] cave) {

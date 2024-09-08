@@ -4,5 +4,6 @@ public enum Feelings {
     STENCH,
     BREEZE,
     GLITTER,
-    WUMPUS_SCREAM
+    WUMPUS_SCREAM,
+    IMPACT
 }

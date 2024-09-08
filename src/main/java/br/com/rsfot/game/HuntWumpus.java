@@ -2,6 +2,9 @@ package br.com.rsfot.game;
 
 import br.com.rsfot.domain.*;
 
+import java.util.List;
+import java.util.Map;
+
 import static br.com.rsfot.domain.Direction.*;
 import static br.com.rsfot.domain.EnvironmentObject.WUMPUS;
 import static br.com.rsfot.domain.Feelings.GLITTER;
@@ -17,8 +20,17 @@ public class HuntWumpus {
         this.environment = environment;
     }
 
+    public HuntWumpus(Agent agent, Environment environment) {
+        this.agent = agent;
+        this.environment = environment;
+    }
+
     public Agent getAgent() {
         return agent;
+    }
+
+    public void setAgent(Agent agent) {
+        this.agent = agent;
     }
 
     public Environment getEnvironment() {
@@ -67,6 +79,7 @@ public class HuntWumpus {
             agent.decreasePointByShoot();
             if (isTheAgentKillTheWumpus()) {
                 agent.killTheWumpus();
+                agent.increasePointByKillTheWumpus();
                 System.out.println(Feelings.WUMPUS_SCREAM.name());
                 System.out.println("You killed the Wumpus");
             }
@@ -158,5 +171,16 @@ public class HuntWumpus {
             case WEST -> agent.setFacingDirection(WEST);
         }
         return this.moveForward();
+    }
+
+    public void resetGame() {
+        this.agent = new Agent();
+        this.agentWinTheGame = false;
+    }
+
+    public List<Feelings> getCurrentFeelingsFromAgent() {
+        return getEnvironment().getFeelingsByCoordinate().get(agent.getStringCoordinate()).stream()
+                .toList();
+
     }
 }
