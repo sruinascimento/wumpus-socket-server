@@ -3,6 +3,7 @@ package br.com.rsfot.train;
 import br.com.rsfot.domain.Agent;
 import br.com.rsfot.domain.Environment;
 import br.com.rsfot.domain.Feelings;
+import br.com.rsfot.domain.action.ProcessCommand;
 import br.com.rsfot.game.HuntWumpus;
 import br.com.rsfot.report.Report;
 
@@ -30,18 +31,28 @@ public class EpisodeGenerator {
         //setup random coordinate to the agent
         Agent agent = new Agent();
         int[] coordinate = generateCoordinate();
-        agent.setCoordinateX(coordinate[0]);
-        agent.setCoordinateY(coordinate[1]);
+        agent.setCoordinateX(2);
+        agent.setCoordinateY(0);
         game.setAgent(agent);
 
 
 
 
+        boolean impact = false;
         while (agent.isAlive()) {
             String nextAction = generateReactiveMovement();
-            String currentStateAndAction = executeAction(nextAction);
-            System.out.println(currentStateAndAction);
+                System.out.println(Report.generate(game, impact));
+                System.out.println(nextAction);
+
+                impact = executeAction(nextAction);
+
+//            String currentStateAndAction = executeAction(nextAction);
+//            System.out.println(currentStateAndAction);
+
         }
+
+        System.out.println(Report.generate(game, impact));
+        System.out.println("DO NOTHING");
 
 
         game.resetGame();
@@ -111,31 +122,32 @@ public class EpisodeGenerator {
     }
 
 
-    private String executeAction(String action) {
+    private boolean executeAction(String action) {
+        final var NOT_IMPACT = false;
         return switch (action) {
-            case "MOVE NORTH" -> getCurrentState(game.moveToDirection(NORTH), action);
-            case "MOVE SOUTH" -> getCurrentState(game.moveToDirection(SOUTH), action);
-            case "MOVE EAST" -> getCurrentState(game.moveToDirection(EAST), action);
-            case "MOVE WEST" -> getCurrentState(game.moveToDirection(WEST), action);
+            case "MOVE NORTH" -> !game.moveToDirection(NORTH);
+            case "MOVE SOUTH" -> !game.moveToDirection(SOUTH);
+            case "MOVE EAST" -> !game.moveToDirection(EAST);
+            case "MOVE WEST" -> !game.moveToDirection(WEST);
             case "SHOOT NORTH" -> {
                 game.shoot(NORTH);
-                yield getCurrentState(false, action);
+                yield NOT_IMPACT;
             }
             case "SHOOT SOUTH" -> {
                 game.shoot(SOUTH);
-                yield getCurrentState(false, action);
+                yield NOT_IMPACT;
             }
             case "SHOOT EAST" -> {
                 game.shoot(EAST);
-                yield getCurrentState(false, action);
+                yield NOT_IMPACT;
             }
             case "SHOOT WEST" -> {
                 game.shoot(WEST);
-                yield getCurrentState(false, action);
+                yield NOT_IMPACT;
             }
             case "GRAB" -> {
                 game.grabGold();
-                yield getCurrentState(false, action);
+                yield NOT_IMPACT;
             }
             default -> throw new IllegalArgumentException("Action invalid");
         };
