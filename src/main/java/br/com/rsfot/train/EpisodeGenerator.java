@@ -3,12 +3,13 @@ package br.com.rsfot.train;
 import br.com.rsfot.domain.Agent;
 import br.com.rsfot.domain.Environment;
 import br.com.rsfot.domain.Feelings;
-import br.com.rsfot.domain.action.ProcessCommand;
 import br.com.rsfot.game.HuntWumpus;
 import br.com.rsfot.report.Report;
 
 import java.io.IOException;
 import java.util.*;
+
+import org.json.JSONObject;
 
 import static br.com.rsfot.domain.Direction.*;
 import static br.com.rsfot.domain.Feelings.*;
@@ -24,38 +25,35 @@ public class EpisodeGenerator {
     }
 
     public void generateEpisodes(int numberOfEpisodes) {
-//        for (int i = 0; i < numberOfEpisodes; i++) {
-        System.out.println("Episode " + 1);
+        List<TrainObject> trainObjectList = new ArrayList<>();
+        for (int i = 0; i < numberOfEpisodes; i++) {
+            System.out.println("Episode " + (i + 1));
 
 
-        //setup random coordinate to the agent
-        Agent agent = new Agent();
-        int[] coordinate = generateCoordinate();
-        agent.setCoordinateX(2);
-        agent.setCoordinateY(0);
-        game.setAgent(agent);
+            //setup random coordinate to the agent
+            Agent agent = new Agent();
+            int[] coordinate = generateCoordinate();
+            //2, 0 tem ouro
+            agent.setCoordinateX(coordinate[0]);
+            agent.setCoordinateY(coordinate[1]);
+            game.setAgent(agent);
 
 
+            boolean impact = false;
 
-
-        boolean impact = false;
-        while (agent.isAlive()) {
-            String nextAction = generateReactiveMovement();
-                System.out.println(Report.generate(game, impact));
-                System.out.println(nextAction);
-
+            while (agent.isAlive() && !game.isGameOver()) {
+                String nextAction = generateReactiveMovement();
+                String currentState = Report.generate(game, impact);
+                trainObjectList.add(createTrainObject(impact, nextAction, currentState));
                 impact = executeAction(nextAction);
 
-//            String currentStateAndAction = executeAction(nextAction);
-//            System.out.println(currentStateAndAction);
+            }
 
+            trainObjectList.add(createTrainObject(impact, game.getAgent().agentWinTheGame() ? "AGENT WIN" : "AGENT LOSE", Report.generate(game, impact)));
+
+            game.resetGame();
         }
-
-        System.out.println(Report.generate(game, impact));
-        System.out.println("DO NOTHING");
-
-
-        game.resetGame();
+        if (!trainObjectList.isEmpty()) recordEpisode(trainObjectList);
     }
 
     private int[] generateCoordinate() {
@@ -95,30 +93,55 @@ public class EpisodeGenerator {
 
     }
 
-    private String getCurrentState(boolean impact, String action) {
-        return String.format("Agent's Current State:\n" +
-                        "        - Coordinate: %s\n" +
-                        "        - Gold: %s\n" +
-                        "        - Arrow: %s\n" +
-                        "        - Alive: %s\n\n" +
+    private TrainObject createTrainObject(boolean impact, String action, String agentState) {
+
+        final var instruction = """
+                You are the best and most intelligent agent in the Wumpus World. Your goal is to find the gold and return to the starting position.
+                Below is your current state and the sensations you are feeling in your position. Based on this, decide what action to take next to maximize your chances of success.
+                You respond with only one action (e.g., MOVE NORTH, SHOOT SOUTH, GRAB).
+                The moves you can use are: move north, move south, move east, move west, shoot north, shoot south, shoot east, shoot west, grab.
+                The feelings you can feel are: breeze, stench, glitter, impact.
+                Explanation of the feelings: breeze indicates that there is a pit in an adjacent house. Stench indicates that the Wumpus is in an adjacent house. Glitter indicates that you are in the house that contains the gold. Impact indicates that you collided with the matrix wall.
+                You can only shoot if you have an arrow.
+                ----
+                Reply with the action you want to take next. the format should be `<next action>`.
+                Example:
+                `move north`
+                `shoot east`
+                `grab`
+                """;
+
+        JSONObject jsonObject = new JSONObject(agentState);
+        JSONObject agentStatus = jsonObject.getJSONObject("agentStatus");
+        JSONObject feelings = jsonObject.getJSONObject("feelingByCoordinate");
+
+        final var input = String.format(
+                "Agent's Current State:\n" +
+                        " - Coordinate: %s\n" +
+                        " - Gold: %s\n" +
+                        " - Arrow: %s\n" +
+                        " - Alive: %s\n\n" +
                         "Feelings by Coordinate:\n" +
                         "- Breeze: %s\n" +
                         "- Stench: %s\n" +
                         "- Glitter: %s\n" +
                         "- Impact: %s\n\n" +
                         "- Wumpus Dead: %s\n\n" +
-                        "What's your next movement? \n" +
-                        "Response: %s ",
-                game.getAgent().getStringCoordinate(),
-                game.getAgent().hasGold() ? "yes" : "no",
-                game.getAgent().hasArrow() ? "yes" : "no",
-                game.getAgent().isAlive() ? "yes" : "no",
-                game.getEnvironment().getFeelingsByCoordinate().get(game.getAgent().getStringCoordinate()).contains(BREEZE) ? "yes" : "no",
-                game.getEnvironment().getFeelingsByCoordinate().get(game.getAgent().getStringCoordinate()).contains(STENCH) ? "yes" : "no",
-                game.getEnvironment().getFeelingsByCoordinate().get(game.getAgent().getStringCoordinate()).contains(GLITTER) ? "yes" : "no",
+                        "What's your next movement?",
+                agentStatus.getString("coordinate"),
+                agentStatus.getBoolean("hasGold") ? "yes" : "no",
+                agentStatus.getBoolean("hasArrow") ? "yes" : "no",
+                agentStatus.getBoolean("isAlive") ? "yes" : "no",
+                feelings.getBoolean("breeze") ? "yes" : "no",
+                feelings.getBoolean("stench") ? "yes" : "no",
+                feelings.getBoolean("glitter") ? "yes" : "no",
                 impact ? "yes" : "no",
-                game.getAgent().isKilledTheWumpus() ? "yes" : "no",
-                action);
+                jsonObject.getBoolean("wumpusDead") ? "yes" : "no"
+        );
+
+        final var output = action;
+
+        return new TrainObject(instruction, input, output);
     }
 
 
@@ -153,9 +176,12 @@ public class EpisodeGenerator {
         };
     }
 
-    private void recordEpisode(String state, String action, String newState) {
-        // Implement the logic to record the episode, e.g., save to a file or database
-        System.out.println("State: " + state);
+    private void recordEpisode(List<TrainObject> trainObjectList) {
+        try {
+            JsonFileWriter.writeTrainObjectListToJsonFile(trainObjectList, "primeiroDataset.json");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
@@ -163,7 +189,7 @@ public class EpisodeGenerator {
         List<Environment> environments4x4 = EnvironmentManagerRandomGenerator.loadEnvironmentsFromFile("environments4x4.dat");
 
         EpisodeGenerator generator = new EpisodeGenerator(environments4x4.get(0));
-        generator.generateEpisodes(1);
+        generator.generateEpisodes(2);
 //        generator.generateEpisodes(10); // Generate 10 episodes
     }
 }
