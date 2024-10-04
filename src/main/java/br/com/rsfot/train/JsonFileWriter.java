@@ -27,13 +27,19 @@ public class JsonFileWriter {
 
     }
 
-//    public static void main(String[] args) {
-//        TrainObject trainObject = new TrainObject("instruction", "input", "output");
-//        try {
-//            writeTrainObjectToJsonFile(trainObject, "trainObject.json");
-//            System.out.println("TrainObject has been written to trainObject.json");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    public static void writeTrainObjectNNListToJsonFile(List<TrainObjectNN> trainObjectList, String filePath) throws IOException {
+        JSONArray jsonArray = new JSONArray();
+
+        for (TrainObjectNN trainObject : trainObjectList) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("input", trainObject.input());
+            jsonObject.put("output", trainObject.output());
+            jsonArray.put(jsonObject);
+        }
+
+        try (FileWriter file = new FileWriter(filePath)) {
+            file.write(jsonArray.toString(4));
+        }
+
+    }
 }

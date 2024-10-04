@@ -18,14 +18,14 @@ import static br.com.rsfot.domain.Feelings.GLITTER;
 public class EpisodeGenerator {
     private HuntWumpus game;
     private final Random random;
+    private List<TrainObject> trainObjectList = new ArrayList<>();
 
     public EpisodeGenerator(Environment environment) {
         this.random = new Random();
         this.game = new HuntWumpus(environment);
     }
 
-    public void generateEpisodes(int numberOfEpisodes) {
-        List<TrainObject> trainObjectList = new ArrayList<>();
+    public List<TrainObject> generateEpisodes(int numberOfEpisodes) {
         for (int i = 0; i < numberOfEpisodes; i++) {
             System.out.println("Episode " + (i + 1));
 
@@ -53,7 +53,8 @@ public class EpisodeGenerator {
 
             game.resetGame();
         }
-        if (!trainObjectList.isEmpty()) recordEpisode(trainObjectList);
+
+        return trainObjectList;
     }
 
     private int[] generateCoordinate() {
@@ -178,7 +179,7 @@ public class EpisodeGenerator {
 
     private void recordEpisode(List<TrainObject> trainObjectList) {
         try {
-            JsonFileWriter.writeTrainObjectListToJsonFile(trainObjectList, "primeiroDataset.json");
+            JsonFileWriter.writeTrainObjectListToJsonFile(trainObjectList, "train_data_set4x4.json");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -187,9 +188,20 @@ public class EpisodeGenerator {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         List<Environment> environments4x4 = EnvironmentManagerRandomGenerator.loadEnvironmentsFromFile("environments4x4.dat");
+        List<TrainObject> trainObjectList = new ArrayList<>();
 
-        EpisodeGenerator generator = new EpisodeGenerator(environments4x4.get(0));
-        generator.generateEpisodes(2);
-//        generator.generateEpisodes(10); // Generate 10 episodes
+        for (Environment environment: environments4x4) {
+            EpisodeGenerator generator = new EpisodeGenerator(environment);
+            trainObjectList.addAll(generator.generateEpisodes(15));
+
+        }
+
+        try {
+            JsonFileWriter.writeTrainObjectListToJsonFile(trainObjectList, "train_data_set4x4.json");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        System.out.println(trainObjectList.size());
     }
 }
