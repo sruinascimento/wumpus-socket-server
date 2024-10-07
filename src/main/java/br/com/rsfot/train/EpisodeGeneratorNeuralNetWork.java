@@ -71,9 +71,9 @@ public class EpisodeGeneratorNeuralNetWork {
         int coordinateX = huntWumpus.getAgent().getCoordinateX();
         int coordinateY = huntWumpus.getAgent().getCoordinateY();
         int isAlive = huntWumpus.getAgent().isAlive() ? 1 : 0;
-        int isKilledTheWumpus = huntWumpus.getAgent().isKilledTheWumpus() ? 1 : 0;
         int hasGold = huntWumpus.getAgent().hasGold() ? 1 : 0;
         int hasArrow = huntWumpus.getAgent().hasArrow() ? 1 : 0;
+        int isKilledTheWumpus = huntWumpus.getAgent().isKilledTheWumpus() ? 1 : 0;
         int breeze = huntWumpus.getEnvironment().getFeelingsByCoordinate().get(huntWumpus.getAgent().getStringCoordinate()).contains(BREEZE) ? 1 : 0;
         int stench = huntWumpus.getEnvironment().getFeelingsByCoordinate().get(huntWumpus.getAgent().getStringCoordinate()).contains(STENCH) ? 1 : 0;
         int glitter = huntWumpus.getEnvironment().getFeelingsByCoordinate().get(huntWumpus.getAgent().getStringCoordinate()).contains(GLITTER) && !huntWumpus.getAgent().hasGold() ? 1 : 0;
@@ -83,9 +83,9 @@ public class EpisodeGeneratorNeuralNetWork {
                 coordinateX,
                 coordinateY,
                 isAlive,
-                isKilledTheWumpus,
                 hasGold,
                 hasArrow,
+                isKilledTheWumpus,
                 breeze,
                 stench,
                 glitter,

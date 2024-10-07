@@ -8,15 +8,18 @@ import java.util.List;
 
 public class EnvironmentManagerRandomGenerator {
 
-    public static void saveEnvironmentsToFile(String filename, int count, int dimension) throws IOException {
+    public static void saveEnvironmentsToFile( ) throws IOException {
         List<Environment> environments = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            environments.add(new Environment(dimension));
+        for (int i = 0; i < 100; i++) {
+            environments.add(new Environment(7));
         }
 
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("environments7x7_100_matrizes_test.dat"))) {
             oos.writeObject(environments);
         }
+
+
+
     }
     @SuppressWarnings("unchecked")
     public static List<Environment> loadEnvironmentsFromFile(String filename) throws IOException, ClassNotFoundException {

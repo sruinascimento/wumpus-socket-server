@@ -3,6 +3,7 @@ package br.com.rsfot.train;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
@@ -17,6 +18,7 @@ import org.deeplearning4j.nn.weights.WeightInit;
 import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -87,5 +89,12 @@ public class WumpusMLP {
         // Encontrar a ação com maior probabilidade
         int maxIndex = Nd4j.argMax(outputPredicted, 1).getInt(0);
         System.out.println("Ação predita: " + maxIndex); // 0 = GRAB, 1 = MOVE NORTH, etc.
+
+        File modelFile = new File("wumpus4x4trained.zip");
+        try {
+            ModelSerializer.writeModel(model, modelFile, true);  // 'true' para incluir o parâmetro do normalizador (se existir)
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
