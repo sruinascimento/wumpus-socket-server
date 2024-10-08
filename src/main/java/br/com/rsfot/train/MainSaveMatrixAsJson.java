@@ -22,7 +22,7 @@ public class MainSaveMatrixAsJson {
     }
 
     public static List<Environment> loadEnvironmentsFromFile() throws IOException {
-        List<String[][]> matrices = MatrixUtils.loadMatricesFromFile("environments_7x7_100_test.json");
+        List<String[][]> matrices = MatrixUtils.loadMatricesFromFile("environments_4x4_40_test.json");
         List<Environment> environments = new ArrayList<>();
         for (String[][] matrix : matrices) {
             environments.add(new Environment(matrix));
@@ -47,16 +47,18 @@ public class MainSaveMatrixAsJson {
                 System.out.println("Envie " + count++);
 
                 Environment environment = new Environment(env.getCave());
-                environment.showCave();
-                environment.getFeelingsByCoordinate().forEach((k, v) -> {
-                    System.out.println(k + " -> " + v);
-                });
 
-                System.out.println();
-                System.out.println();
-                System.out.println("=====================================");
-                System.out.println();
-                System.out.println();
+
+//                environment.showCave();
+//                environment.getFeelingsByCoordinate().forEach((k, v) -> {
+//                    System.out.println(k + " -> " + v);
+//                });
+//
+//                System.out.println();
+//                System.out.println();
+//                System.out.println("=====================================");
+//                System.out.println();
+//                System.out.println();
             }
         } catch (IOException e) {
             e.printStackTrace();
