@@ -44,24 +44,23 @@ public class EpisodeGeneratorNeuralNetWork {
             Agent agent = new Agent();
             int[] coordinate = generateCoordinate();
             agent.setCoordinateX(coordinate[0]);
-//            agent.setCoordinateX(0);
-//            agent.setCoordinateY(3);
-            String[][] environment = game.getEnvironment().getCave();
             agent.setCoordinateY(coordinate[1]);
             game.setAgent(agent);
 
 
             boolean impact = false;
 
-            while (agent.isAlive() && !game.isGameOver()) {
+            int count = 0;
+            while ((agent.isAlive() && !game.isGameOver()) && count < 10) {
                 String nextAction = generateReactiveMovement();
                 List<Integer> currentStateInVectorRepresentation = generateVectorRepresentationOfAgentState(game, impact);
                 trainObjectList.add(new TrainObjectNN(currentStateInVectorRepresentation, outputBinaryRepresentationByAction.get(nextAction)));
                 impact = executeAction(nextAction);
-
+                count++;
             }
-
-            trainObjectList.add(new TrainObjectNN(generateVectorRepresentationOfAgentState(game, impact), outputBinaryRepresentationByAction.get("NO ACTION")));
+            if (!agent.isAlive()) {
+                trainObjectList.add(new TrainObjectNN(generateVectorRepresentationOfAgentState(game, impact), outputBinaryRepresentationByAction.get("NO ACTION")));
+            }
 
 
             game.resetGame();
@@ -165,29 +164,29 @@ public class EpisodeGeneratorNeuralNetWork {
     }
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        List<Environment> environments4x4 = EnvironmentManagerRandomGenerator.loadEnvironmentsFromFile("src/main/resources/environments4x4_160_matrizes_train.dat");
-        List<TrainObjectNN> trainObjectList = new ArrayList<>();
+        //Classe usada para gerar episódios para treinamento da rede neural
 
-        environments4x4.getFirst().showCave();
+        List<TrainObjectNN> trainObjectNNList = new ArrayList<>();
+        List<String[][]> environments = loadEnvironmentsFromFile("environments_7x7_400_train.json");
 
-        EpisodeGeneratorNeuralNetWork generator = new EpisodeGeneratorNeuralNetWork(environments4x4.getFirst());
 
-        trainObjectList.addAll(generator.generateEpisodes(15));
+        for (String[][] cave: environments) {
+            Environment environment = new Environment(cave);
+            EpisodeGeneratorNeuralNetWork generator = new EpisodeGeneratorNeuralNetWork(environment);
+            trainObjectNNList.addAll(generator.generateEpisodes(15));
+        }
 
-        trainObjectList.forEach(System.out::println);
-
-//        for (Environment environment : environments4x4) {
-//            EpisodeGeneratorNeuralNetWork generator = new EpisodeGeneratorNeuralNetWork(environment);
-//            trainObjectList.addAll(generator.generateEpisodes(15));
-//
-//        }
+        System.out.println(trainObjectNNList.size());
 
 //        try {
-//            JsonFileWriter.writeTrainObjectNNListToJsonFile(trainObjectList, "src/main/resources/nn_environments4x4_train.json");
+//            JsonFileWriter.writeTrainObjectNNListToJsonFile(trainObjectNNList, "nn_episodes7x7_train.json");
 //        } catch (IOException e) {
 //            throw new RuntimeException(e);
 //        }
 
-        System.out.println(trainObjectList.size());
+    }
+
+    public static List<String[][]> loadEnvironmentsFromFile(String pathFile) throws IOException {
+        return MatrixUtils.loadMatricesFromFile(pathFile);
     }
 }
