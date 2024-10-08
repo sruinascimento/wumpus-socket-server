@@ -122,9 +122,14 @@ public class Agent {
         this.score += 500;
     }
 
+    public void increasePointByGrabGold() {
+        this.score += 1000;
+    }
+
     public boolean isKilledTheWumpus() {
         return killedTheWumpus;
     }
+
     public void killTheWumpus() {
         this.killedTheWumpus = true;
     }

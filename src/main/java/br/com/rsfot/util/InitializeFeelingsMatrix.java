@@ -21,13 +21,13 @@ public class InitializeFeelingsMatrix {
 
                 Set<Feelings> feelings = new HashSet<>();
 
-                if (isGlitter(i, j, environmentMatrix)) {
+                if (senseElement(environmentMatrix, i, j, GOLD.name())) {
                     feelings.add(GLITTER);
                 }
-                if (isStench(i, j, environmentMatrix)) {
+                if (senseElement(environmentMatrix, i, j, WUMPUS.name())) {
                     feelings.add(Feelings.STENCH);
                 }
-                if (isBreeze(i, j, environmentMatrix)) {
+                if (senseElement(environmentMatrix, i, j, PIT.name())) {
                     feelings.add(Feelings.BREEZE);
                 }
 
@@ -63,6 +63,54 @@ public class InitializeFeelingsMatrix {
         }
         if (y - 1 >= 0 && environmentMatrix[x][y - 1].equals(elementType)) {
             return true;
+        }
+        return false;
+    }
+
+    //NEW IMPLEMENTATION
+    private static boolean senseElement(String[][] cave, int x, int y, String element) {
+        if (x < 0 || y < 0 || x >= cave.length || y >= cave[0].length) {
+            return false;
+        }
+
+        switch (element) {
+            case "GOLD":
+                return cave[x][y].equals("GOLD");
+            case "WUMPUS":
+                return senseStench(x, y, cave);
+            case "PIT":
+                return senseBreeze(x, y, cave);
+            default:
+                throw new RuntimeException("Unknown element");
+        }
+    }
+
+    private static boolean senseStench(int x, int y, String[][] cave) {
+        // Check neighbors (north, south, east, west)
+        int[][] neighbors = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        for (int[] neighbor : neighbors) {
+            int nx = x + neighbor[0];
+            int ny = y + neighbor[1];
+            if (nx >= 0 && ny >= 0 && nx < cave.length && ny < cave[0].length) {
+                if (cave[nx][ny].equals("WUMPUS")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean senseBreeze(int x, int y, String[][] cave) {
+        // Check neighbors (north, south, east, west)
+        int[][] neighbors = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        for (int[] neighbor : neighbors) {
+            int nx = x + neighbor[0];
+            int ny = y + neighbor[1];
+            if (nx >= 0 && ny >= 0 && nx < cave.length && ny < cave[0].length) {
+                if (cave[nx][ny].equals("PIT")) {
+                    return true;
+                }
+            }
         }
         return false;
     }

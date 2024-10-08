@@ -10,19 +10,34 @@ public class EnvironmentGenerator {
     public static void main(String[] args) {
         try {
 //             Salvar os ambientes no arquivo
-//            EnvironmentManagerRandomGenerator.saveEnvironmentsToFile();
-//            System.out.println("Ambientes salvos com sucesso!");
+            EnvironmentManagerRandomGenerator.saveEnvironmentsToFile();
+            System.out.println("Ambientes salvos com sucesso!");
 
 //             Carregar os ambientes do arquivo
-            List<Environment> environments = EnvironmentManagerRandomGenerator.loadEnvironmentsFromFile("environments7x7_400_matrizes_train.dat");
+            List<Environment> environments = EnvironmentManagerRandomGenerator.loadEnvironmentsFromFile("src/main/resources/environments4x4_40_matrizes_test.dat");
             System.out.println("Ambientes carregados com sucesso! Total: " + environments.size());
 
+            for (Environment env: environments) {
+                Environment environment = new Environment(env.getCave());
+                environment.showCave();
+                environment.getFeelingsByCoordinate().forEach((k, v) -> {
+                    System.out.println(k + " -> " + v);
+                });
+            }
 
-            IntStream.range(0, environments.size()).forEach(i -> {
-                System.out.println();
-                System.out.println("Ambiente " + i );
-                environments.get(i).showCave();
-            });
+            // Mostrar os ambientes
+//            Environment environment = new Environment(environments.getFirst().getCave());
+//            environment.showCave();
+//            environment.getFeelingsByCoordinate().forEach((k, v) -> {
+//                System.out.println(k + " -> " + v);
+//            });
+//            IntStream.range(0, environments.size()).forEach(i -> {
+//                System.out.println();
+//                System.out.println("Ambiente " + i );
+//                environments.get(i).showCave();
+//                System.out.println();
+//                System.out.println(environments.get(i).getFeelingsByCoordinate());
+//            });
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();

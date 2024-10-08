@@ -13,7 +13,7 @@ public record FeelingByCoordinate(
     public FeelingByCoordinate(Environment environment, Agent agent, boolean impact) {
         this(
                 environment.getFeelingsByCoordinate().get(agent.getStringCoordinate()).contains(BREEZE),
-                environment.getFeelingsByCoordinate().get(agent.getStringCoordinate()).contains(STENCH),
+                environment.getFeelingsByCoordinate().get(agent.getStringCoordinate()).contains(STENCH) && !agent.isKilledTheWumpus(),
                 environment.getFeelingsByCoordinate().get(agent.getStringCoordinate()).contains(GLITTER) && !agent.hasGold(),
                 impact
         );

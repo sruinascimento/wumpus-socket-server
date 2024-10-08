@@ -19,9 +19,9 @@ public class Environment implements Serializable {
         this.feelingsByCoordinate = InitializeFeelingsMatrix.setup(cave);
     }
 
-    public Environment(String[][] cave, int dimension) {
+    public Environment(String[][] cave) {
         this.cave = cave;
-        this.dimension = dimension;
+        this.dimension = cave.length;
         this.feelingsByCoordinate = InitializeFeelingsMatrix.setup(cave);
     }
 

@@ -18,7 +18,7 @@ public class EpisodeGeneratorNeuralNetWork {
     private HuntWumpus game;
     private final Random random;
     private List<TrainObjectNN> trainObjectList = new ArrayList<>();
-    private Map<String, List<Integer>> representationBinaryByAction = Map.of(
+    private Map<String, List<Integer>> outputBinaryRepresentationByAction = Map.of(
             "GRAB", List.of(1, 0, 0, 0, 0, 0, 0, 0, 0),
             "MOVE NORTH", List.of(0, 1, 0, 0, 0, 0, 0, 0, 0),
             "MOVE SOUTH", List.of(0, 0, 1, 0, 0, 0, 0, 0, 0),
@@ -44,6 +44,9 @@ public class EpisodeGeneratorNeuralNetWork {
             Agent agent = new Agent();
             int[] coordinate = generateCoordinate();
             agent.setCoordinateX(coordinate[0]);
+//            agent.setCoordinateX(0);
+//            agent.setCoordinateY(3);
+            String[][] environment = game.getEnvironment().getCave();
             agent.setCoordinateY(coordinate[1]);
             game.setAgent(agent);
 
@@ -53,12 +56,12 @@ public class EpisodeGeneratorNeuralNetWork {
             while (agent.isAlive() && !game.isGameOver()) {
                 String nextAction = generateReactiveMovement();
                 List<Integer> currentStateInVectorRepresentation = generateVectorRepresentationOfAgentState(game, impact);
-                trainObjectList.add(new TrainObjectNN(currentStateInVectorRepresentation, representationBinaryByAction.get(nextAction)));
+                trainObjectList.add(new TrainObjectNN(currentStateInVectorRepresentation, outputBinaryRepresentationByAction.get(nextAction)));
                 impact = executeAction(nextAction);
 
             }
 
-            trainObjectList.add(new TrainObjectNN(generateVectorRepresentationOfAgentState(game, impact), representationBinaryByAction.get("NO ACTION")));
+            trainObjectList.add(new TrainObjectNN(generateVectorRepresentationOfAgentState(game, impact), outputBinaryRepresentationByAction.get("NO ACTION")));
 
 
             game.resetGame();
@@ -73,7 +76,7 @@ public class EpisodeGeneratorNeuralNetWork {
         int isAlive = huntWumpus.getAgent().isAlive() ? 1 : 0;
         int hasGold = huntWumpus.getAgent().hasGold() ? 1 : 0;
         int hasArrow = huntWumpus.getAgent().hasArrow() ? 1 : 0;
-        int isKilledTheWumpus = huntWumpus.getAgent().isKilledTheWumpus() ? 1 : 0;
+        int isWumpusAlive = huntWumpus.getAgent().isKilledTheWumpus() ? 0 : 1;
         int breeze = huntWumpus.getEnvironment().getFeelingsByCoordinate().get(huntWumpus.getAgent().getStringCoordinate()).contains(BREEZE) ? 1 : 0;
         int stench = huntWumpus.getEnvironment().getFeelingsByCoordinate().get(huntWumpus.getAgent().getStringCoordinate()).contains(STENCH) ? 1 : 0;
         int glitter = huntWumpus.getEnvironment().getFeelingsByCoordinate().get(huntWumpus.getAgent().getStringCoordinate()).contains(GLITTER) && !huntWumpus.getAgent().hasGold() ? 1 : 0;
@@ -85,7 +88,7 @@ public class EpisodeGeneratorNeuralNetWork {
                 isAlive,
                 hasGold,
                 hasArrow,
-                isKilledTheWumpus,
+                isWumpusAlive,
                 breeze,
                 stench,
                 glitter,
@@ -162,20 +165,28 @@ public class EpisodeGeneratorNeuralNetWork {
     }
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        List<Environment> environments4x4 = EnvironmentManagerRandomGenerator.loadEnvironmentsFromFile("environments4x4.dat");
+        List<Environment> environments4x4 = EnvironmentManagerRandomGenerator.loadEnvironmentsFromFile("src/main/resources/environments4x4_160_matrizes_train.dat");
         List<TrainObjectNN> trainObjectList = new ArrayList<>();
 
-        for (Environment environment : environments4x4) {
-            EpisodeGeneratorNeuralNetWork generator = new EpisodeGeneratorNeuralNetWork(environment);
-            trainObjectList.addAll(generator.generateEpisodes(15));
+        environments4x4.getFirst().showCave();
 
-        }
+        EpisodeGeneratorNeuralNetWork generator = new EpisodeGeneratorNeuralNetWork(environments4x4.getFirst());
 
-        try {
-            JsonFileWriter.writeTrainObjectNNListToJsonFile(trainObjectList, "train_data_set4x4_to_NN.json");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        trainObjectList.addAll(generator.generateEpisodes(15));
+
+        trainObjectList.forEach(System.out::println);
+
+//        for (Environment environment : environments4x4) {
+//            EpisodeGeneratorNeuralNetWork generator = new EpisodeGeneratorNeuralNetWork(environment);
+//            trainObjectList.addAll(generator.generateEpisodes(15));
+//
+//        }
+
+//        try {
+//            JsonFileWriter.writeTrainObjectNNListToJsonFile(trainObjectList, "src/main/resources/nn_environments4x4_train.json");
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
 
         System.out.println(trainObjectList.size());
     }
