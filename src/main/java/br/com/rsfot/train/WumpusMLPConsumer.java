@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class WumpusMLPConsumer {
     public static void main(String[] args) {
-        File modelFile = new File("wumpus4x4trained.zip");
+        File modelFile = new File("5x5_matrix_trained_model_30_epochs.zip");
         MultiLayerNetwork loadedModel = null;
         try {
             loadedModel = ModelSerializer.restoreMultiLayerNetwork(modelFile);
@@ -18,11 +18,17 @@ public class WumpusMLPConsumer {
             e.printStackTrace();
         }
 
-        INDArray inputExample = Nd4j.create(new double[][]{{2, 3, 1, 0, 0, 0, 1, 0, 0, 0}});
+        INDArray inputExample = Nd4j.create(new double[][]{{2, 3, 1, 0, 0, 0, 0, 0, 1, 0}});
         INDArray outputPredicted = loadedModel.output(inputExample);
 
         // Encontrar a ação com maior probabilidade
         int maxIndex = Nd4j.argMax(outputPredicted, 1).getInt(0);
         System.out.println("Ação predita: " + maxIndex); // 0 = GRAB, 1 = MOVE NORTH, etc.
+
+        String[] actions = {"GRAB", "MOVE NORTH", "MOVE SOUTH", "MOVE EAST", "MOVE WEST", "SHOOT NORTH", "SHOOT SOUTH", "SHOOT EAST", "SHOOT WEST", "NO ACTION"};
+        String predictedAction = actions[maxIndex];
+
+        System.out.println("Ação predita: " + predictedAction);
+
     }
 }

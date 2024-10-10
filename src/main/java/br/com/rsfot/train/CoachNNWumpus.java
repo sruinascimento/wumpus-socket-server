@@ -84,25 +84,25 @@ public class CoachNNWumpus {
 //        model.fit(dataSet);
 
         //Treinar a rede em 30 epocas
-        int numEpochs = 30;
-        for (int epoch = 0; epoch < numEpochs; epoch++) {
-            model.fit(dataSet);
-            System.out.println("Época " + (epoch + 1) + " concluída.");
-        }
+//        int numEpochs = 30;
+//        for (int epoch = 0; epoch < numEpochs; epoch++) {
+//            model.fit(dataSet);
+//            System.out.println("Época " + (epoch + 1) + " concluída.");
+//        }
 
-        // Fazer uma predição
-//        INDArray inputExample = Nd4j.create(new double[][]{{2, 3, 1, 0, 1, 1, 0, 0, 1, 0}});
-//        INDArray outputPredicted = model.output(inputExample);
-//
-//        // Encontrar a ação com maior probabilidade
-//        int maxIndex = Nd4j.argMax(outputPredicted, 1).getInt(0);
-//        System.out.println("Ação predita: " + maxIndex); // 0 = GRAB, 1 = MOVE NORTH, etc.
+//         Fazer uma predição
+        INDArray inputExample = Nd4j.create(new double[][]{{2, 3, 1, 0, 1, 1, 0, 0, 1, 0}});
+        INDArray outputPredicted = model.output(inputExample);
 
-        File modelFile = new File("4x4_matrix_trained_model_30_epochs.zip");
-        try {
-            ModelSerializer.writeModel(model, modelFile, true);  // 'true' para incluir o parâmetro do normalizador (se existir)
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // Encontrar a ação com maior probabilidade
+        int maxIndex = Nd4j.argMax(outputPredicted, 1).getInt(0);
+        System.out.println("Ação predita: " + maxIndex); // 0 = GRAB, 1 = MOVE NORTH, etc.
+
+//        File modelFile = new File("4x4_matrix_trained_model_30_epochs.zip");
+//        try {
+//            ModelSerializer.writeModel(model, modelFile, true);  // 'true' para incluir o parâmetro do normalizador (se existir)
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 }
