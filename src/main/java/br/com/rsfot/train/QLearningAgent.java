@@ -6,9 +6,7 @@ import br.com.rsfot.game.HuntWumpus;
 import org.nd4j.shade.jackson.databind.ObjectMapper;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -194,13 +192,11 @@ public class QLearningAgent {
     public static void main(String[] args) throws IOException {
         List<String[][]> environments = MatrixUtils.loadMatricesFromFile("environments_4x4_160_train.json");
         QLearningAgent agent = new QLearningAgent(0.1, 0.9, 0.1);
-//        for (String[][] cave : environments) {
-//            Environment environment = new Environment(cave);
-//            agent.train(environment, 1);
-//        }
-        Environment environment = new Environment(environments.get(0));
-        agent.train(environment, 1);
-        agent.saveQTable("qTable.json");
+        for (String[][] cave : environments) {
+            Environment environment = new Environment(cave);
+            agent.train(environment, 1000);
+        }
+//        agent.saveQTable("qTable4x4.json");
 
     }
 
