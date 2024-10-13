@@ -67,11 +67,11 @@ public class HuntWumpus {
 
     public void grabGold() {
         if (environment.getFeelingsByCoordinate().get(agent.getStringCoordinate()).contains(GLITTER)) {
-            agent.grab();
-            agent.decreasePointByAction();
-            if(agent.hasGold()) {
+            if(!agent.hasGold()) {
                 agent.increasePointByGrabGold();
             }
+            agent.grab();
+            agent.decreasePointByAction();
         }
     }
 
