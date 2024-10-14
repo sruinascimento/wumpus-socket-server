@@ -1,11 +1,10 @@
 package br.com.rsfot.train;
 
 import br.com.rsfot.domain.Agent;
+import br.com.rsfot.domain.Direction;
 import br.com.rsfot.domain.Environment;
 import br.com.rsfot.game.HuntWumpus;
-import org.nd4j.shade.jackson.databind.ObjectMapper;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -65,12 +64,6 @@ public class QLearningAgent {
         qTable.computeIfAbsent(state, k -> new HashMap<>()).put(action, newQValue);
     }
 
-    public void saveQTable(String filePath) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.writeValue(new File(filePath), qTable);
-    }
-
-
     public void saveQTableDat(String filePath) throws IOException {
         try (FileOutputStream fileOut = new FileOutputStream(filePath);
              ObjectOutputStream out = new ObjectOutputStream(fileOut)) {
@@ -83,17 +76,34 @@ public class QLearningAgent {
         boolean impact = false;
         for (int i = 0; i < episodes; i++) {
             Agent agent = new Agent();
+            int[] coordinate = generateCoordinate(game);
+            agent.setCoordinateX(coordinate[0]);
+            agent.setCoordinateY(coordinate[1]);
             game.setAgent(agent);
             List<Integer> state = generateVectorRepresentationOfAgentState(game, impact);
-            while (agent.isAlive() && !game.isGameOver()) {
+            int actionsByEpisode = 0;
+            double maxActionsByEpisode = Math.pow(environment.getDimension(), 2) * 2;
+            while (agent.isAlive() && !game.isGameOver() && actionsByEpisode < maxActionsByEpisode) {
                 String action = chooseAction(state, possibleActions);
                 List<Object> rewardAndImpact = executeAction(action, game);
                 impact = (boolean)rewardAndImpact.getLast();
                 List<Integer> nextState = generateVectorRepresentationOfAgentState(game, impact);
                 updateQTable(state, action, (double)rewardAndImpact.getFirst(), nextState);
                 state = nextState;
+                actionsByEpisode++;
             }
             game.resetGame();
+        }
+    }
+
+    private int[] generateCoordinate(HuntWumpus game) {
+        while (true) {
+            int x = random.nextInt(game.getEnvironment().getDimension());
+            int y = random.nextInt(game.getEnvironment().getDimension());
+            if (game.getEnvironment().isThereAPitAt(x, y) || game.getEnvironment().isThereAWumpusAt(x, y)) {
+                continue;
+            }
+            return new int[]{x, y};
         }
     }
 
@@ -124,81 +134,57 @@ public class QLearningAgent {
     }
 
     private List<Object> executeAction(String action, HuntWumpus game) {
-        final var NOT_IMPACT = false;
         double reward = 0.0;
-        boolean impact = switch (action) {
+        boolean impact;
+
+        switch (action) {
             case "MOVE NORTH" -> {
-                reward += calculateReward(game);
-                yield !game.moveToDirection(NORTH);
+                var result = handleMoveAction(game, NORTH, reward);
+                impact = result.impact;
+                reward = result.reward;
             }
             case "MOVE SOUTH" -> {
-                reward += calculateReward(game);
-                yield !game.moveToDirection(SOUTH);
+                var result = handleMoveAction(game, SOUTH, reward);
+                impact = result.impact;
+                reward = result.reward;
             }
             case "MOVE EAST" -> {
-                reward += calculateReward(game);
-                yield !game.moveToDirection(EAST);
+                var result = handleMoveAction(game, EAST, reward);
+                impact = result.impact;
+                reward = result.reward;
             }
             case "MOVE WEST" -> {
-                reward += calculateReward(game);
-                yield !game.moveToDirection(WEST);
+                var result = handleMoveAction(game, WEST, reward);
+                impact = result.impact;
+                reward = result.reward;
             }
             case "SHOOT NORTH" -> {
-                if (!game.getAgent().hasArrow() || !game.getCurrentFeelingsFromAgent().contains(STENCH)) {
-                    reward -= 500;
-                }
-                game.shoot(NORTH);
-                reward -= 10;
-                if (game.getAgent().isKilledTheWumpus()) {
-                    reward += 500; // Recompensa por matar o Wumpus
-                }
-                yield NOT_IMPACT;
+                var result = handleShootAction(game, NORTH, reward);
+                impact = result.impact;
+                reward = result.reward;
             }
             case "SHOOT SOUTH" -> {
-                if (!game.getAgent().hasArrow() || !game.getCurrentFeelingsFromAgent().contains(STENCH)) {
-                    reward -= 500;
-                }
-                game.shoot(SOUTH);
-                reward -= 10;
-                if (game.getAgent().isKilledTheWumpus()) {
-                    reward += 500; // Recompensa por matar o Wumpus
-                }
-                yield NOT_IMPACT;
+                var result = handleShootAction(game, SOUTH, reward);
+                impact = result.impact;
+                reward = result.reward;
             }
             case "SHOOT EAST" -> {
-                if (!game.getAgent().hasArrow() || !game.getCurrentFeelingsFromAgent().contains(STENCH)) {
-                    reward -= 500;
-                }
-                game.shoot(EAST);
-                reward -= 10;
-                if (game.getAgent().isKilledTheWumpus()) {
-                    reward += 500; // Recompensa por matar o Wumpus
-                }
-                yield NOT_IMPACT;
+                var result = handleShootAction(game, EAST, reward);
+                impact = result.impact;
+                reward = result.reward;
             }
             case "SHOOT WEST" -> {
-                if (!game.getAgent().hasArrow() || !game.getCurrentFeelingsFromAgent().contains(STENCH)) {
-                    reward -= 500;
-                }
-                game.shoot(WEST);
-                reward -= 10;
-                if (game.getAgent().isKilledTheWumpus()) {
-                    reward += 500; // Recompensa por matar o Wumpus
-                }
-                yield NOT_IMPACT;
+                var result = handleShootAction(game, WEST, reward);
+                impact = result.impact;
+                reward = result.reward;
             }
             case "GRAB" -> {
-                if (!game.getAgent().hasGold() && game.getCurrentFeelingsFromAgent().contains(GLITTER)) {
-                    reward += 1000;
-                } else {
-                    reward -= 500;
-                }
-                game.grabGold();
-
-                yield NOT_IMPACT;
+                var result = handleGrabAction(game, reward);
+                impact = result.impact;
+                reward = result.reward;
             }
             default -> throw new IllegalArgumentException("Action invalid");
-        };
+        }
 
         if (impact) {
             reward -= 500;
@@ -218,14 +204,53 @@ public class QLearningAgent {
     }
 
 
+    private static class ActionResult {
+        double reward;
+        boolean impact;
+
+        ActionResult(double reward, boolean impact) {
+            this.reward = reward;
+            this.impact = impact;
+        }
+    }
+
+    private ActionResult handleMoveAction(HuntWumpus game, Direction direction, double reward) {
+        reward += calculateReward(game);
+        boolean impact = !game.moveToDirection(direction);
+        return new ActionResult(reward, impact);
+    }
+
+    private ActionResult handleShootAction(HuntWumpus game, Direction direction, double reward) {
+        if (!game.getAgent().hasArrow() || !game.getCurrentFeelingsFromAgent().contains(STENCH)) {
+            reward -= 500;
+        }
+        game.shoot(direction);
+        reward -= 10;
+        if (game.getAgent().isKilledTheWumpus()) {
+            reward += 500; // Recompensa por matar o Wumpus
+        }
+        return new ActionResult(reward, false);
+    }
+
+    private ActionResult handleGrabAction(HuntWumpus game, double reward) {
+        if (!game.getAgent().hasGold() && game.getCurrentFeelingsFromAgent().contains(GLITTER)) {
+            reward += 1000;
+        } else {
+            reward -= 500;
+        }
+        game.grabGold();
+        return new ActionResult(reward, false);
+    }
+
     public static void main(String[] args) throws IOException {
         List<String[][]> environments = MatrixUtils.loadMatricesFromFile("environments_4x4_160_train.json");
         QLearningAgent agent = new QLearningAgent(0.1, 0.9, 0.1);
         for (String[][] cave : environments) {
             Environment environment = new Environment(cave);
-            agent.train(environment, 1000);
+            agent.train(environment, 2000);
         }
-        agent.saveQTableDat("qTable4x4.dat");
+        agent.saveQTableDat("qTable4x4_alpha01_gamma09_explorationRate01_episodes2k_train_001.dat");
+
 
     }
 
